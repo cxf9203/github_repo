@@ -1,0 +1,31 @@
+
+{% extends 'layout.html' %}
+{% load static %}
+{% block headerc %}
+<div class="jumbotron jumbotron-lg jumbotron-fluid mb-0 pb-3 bg-primary position-relative">
+        <div class="container-fluid text-white h-100">
+            <div class="d-lg-flex align-items-center justify-content-between text-center pl-lg-5">
+                <div class="col pt-4 pb-4">
+                    <h1 class="display-3">温州职业技术学院 <strong>瑞安学院</strong> & 智能控制技术</h1>
+                    <h5 class="font-weight-light mb-4">智能产线<strong> 数据分析</strong> & <strong><i class="fab fa-sass fa-2x text-info"></i></strong></h5>
+                    <a href="#" class="btn btn-lg btn-outline-white btn-round">Learn more</a>
+                </div>
+                <div class="col align-self-bottom align-items-right text-right h-max-380 h-xl-560 position-relative z-index-1">
+                  <!--这是注释，准备插入图片 工业机器人实训台-->
+                    <img src="{% static 'myline/img/demo/iot01.jpg' %}" class="rounded img-fluid">
+                </div>
+            </div>
+        </div>
+    </div>
+    <svg style="-webkit-transform:rotate(-180deg); -moz-transform:rotate(-180deg); -o-transform:rotate(-180deg); transform:rotate(-180deg); margin-top: -1px;" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewbox="0 0 1440 126" style="enable-background:new 0 0 1440 126;" xml:space="preserve">
+    <path class="bg-primary" d="M685.6,38.8C418.7-11.1,170.2,9.9,0,30v96h1440V30C1252.7,52.2,1010,99.4,685.6,38.8z"/>
+    </svg>
+{% endblock %}
+
+
+{% block content %}
+<!-- End Navbar -->
+
+
+
+{% endblock  %}

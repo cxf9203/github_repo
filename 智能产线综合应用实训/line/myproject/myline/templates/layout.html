@@ -1,0 +1,139 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+  <link rel="apple-touch-icon" sizes="76x76" href="{% static 'sanxing/img/favicon.ico' %}">
+<link rel="icon" type="image/png" href="{%static 'sanxing/img/camera.ico' %}">
+    <title>智能产线综合应用实训</title>
+  <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport'/>
+
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css?family=Nunito:300,300i,400,600,800" rel="stylesheet">
+
+<!-- Font Awesome Icons -->
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+
+<!-- Main CSS -->
+<link href="{% static 'myline/css/main.css' %}" rel="stylesheet"/>
+
+<!-- Animation CSS -->
+<link href="{%static 'myline/css/vendor/aos.css' %}" rel="stylesheet"/>
+    <style>.navbar{
+        border-radius:0;
+    }</style>
+</head>
+<body>
+
+<!----------------------------------------------------------------------
+NAVBAR (remove topnav if you don't want changed nav background on scroll)
+------------------------------------------------------------------------>
+<nav class="topnav navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+<div class="container-fluid">
+	<a class="navbar-brand" href="/sanxing/index/"><i class="fas fa-coffee mr-2"></i><strong>智能产线综合应用实训</strong> IoT</a>
+	<button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
+	<span class="navbar-toggler-icon"></span>
+	</button>
+	<div class="navbar-collapse collapse" id="navbarColor02" style="">
+		<ul class="navbar-nav mr-auto d-flex align-items-center">
+			<li class="nav-item">
+			<a class="nav-link" href="/myline/index/">首页</a>
+			</li>
+			<li class="nav-item dropdown">
+			<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			看板导航 </a>
+			<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+				<a class="dropdown-item" href="#">机器人线</a>
+				<a class="dropdown-item" href="/myline/A_index/">A线</a>
+				<a class="dropdown-item" href="/myline/B_index/">B线</a>
+				<a class="dropdown-item" href="/myline/C_index/">C线</a>
+			</div>
+			<li class="nav-item dropdown">
+			<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			设备管理 </a>
+			<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+				<a class="dropdown-item" href="/myline/PLC_list">PLC设备</a>
+				<a class="dropdown-item" href="/myline/robot_list">机器人设备</a>
+				<a class="dropdown-item" href="/myline/vision_list">视觉设备</a>
+			</div>
+
+			<li class="nav-item">
+			<a class="nav-link" href="/myline/employee_list">人员管理</a>
+			</li>
+			<li class="nav-item dropdown">
+			<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown4" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+			维护历史 </a>
+			<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+				<a class="dropdown-item" href="/myline/maintainence/">设备维护历史</a>
+				<a class="dropdown-item" href="/myline/add_maintain/">新增维护工单</a>
+				
+
+			</div>
+			<li class="nav-item">
+<!--			<a class="nav-link" href="/sanxing/generate_report">生成报表</a>-->
+			</li>
+
+
+
+
+
+		</ul>
+		<ul class="navbar-nav ml-auto d-flex align-items-center">
+
+			<li class="nav-item dropdown">
+			<a class="nav-link dropdown-toggle" href="#" id="navbarDropdown3" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				权限</a>
+			<div class="dropdown-menu" aria-labelledby="navbarDropdown">
+				<a class="dropdown-item" href="/myline/login">登录</a>
+				<a class="dropdown-item" href="/myline/logout">注销</a>
+				<a class="dropdown-item" href="/myline/admin_list">管理员账号</a>
+			</div>
+			<li class="nav-item">
+			<a class="btn btn-info btn-round shadow-sm" href="/myline/screen">设备大屏</a>
+			</li>
+<!--			<li class="nav-item">-->
+<!--			<span class="nav-link" href="#">-->
+<!--			<a class="btn btn-info btn-round shadow-sm" href="#" data-toggle="modal" data-target="#modal_newsletter"><i class="fas fa-cloud-download-alt"></i> 数据下载 <a href="https://github.com/wowthemesnet/Anchor-Bootstrap-UI-Kit/archive/master.zip" class="downloadzip" class="hidden"></a>-->
+<!--			</a>-->
+<!--			</span>-->
+<!--			</li>-->
+		</ul>
+	</div>
+</div>
+</nav>
+<!-- End Navbar -->
+
+
+<!-------------------------------------
+HEADER
+--------------------------------------->
+
+<header>
+	{% block headerc %}
+
+     {% endblock %}
+
+</header>
+<!--- END HEADER -->
+
+<div>
+      {% block content %}
+
+     {% endblock %}
+</div>
+
+<!--------------------------------------
+JAVASCRIPTS
+--------------------------------------->
+<script src="{% static 'myline/js/vendor/jquery.min.js' %}" type="text/javascript"></script>
+<script src="{% static 'myline/js/vendor/popper.min.js' %}" type="text/javascript"></script>
+<script src="{% static 'myline/js/vendor/bootstrap.min.js' %}" type="text/javascript"></script>
+<script src="{% static 'myline/js/vendor/share.js' %}" type="text/javascript"></script>
+<script src="{% static 'myline/js/functions.js' %}" type="text/javascript"></script>
+{% block js %}
+
+{% endblock %}
+<!-- Animation -->
+<script src="{% static 'myline/js/vendor/aos.js'%}" type="text/javascript"></script>
+</body>
+</html>

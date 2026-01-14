@@ -1,0 +1,3 @@
+#安装Django ，modbus_tk 库
+Django
+modbus_tk
