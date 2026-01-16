@@ -43,7 +43,7 @@ def ToHexStr(num):
     return hexStr
 
 """连接数据库"""
-# 数据库文件名
+# 数据库文件名 #todo 修改为你的数据库地址
 db_file = 'D:/github_repo/智能产线综合应用实训/line/myproject/db.sqlite3'
 
 # 1. 检查数据库文件是否存在，如果不存在，sqlite3.connect 会自动创建它

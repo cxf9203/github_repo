@@ -4,7 +4,7 @@ def query_data():
     try:
         # 1. 连接到数据库文件
         # 请确保 db.sqlite3 在当前脚本运行的目录下，或者填写绝对路径
-        conn = sqlite3.connect('db.sqlite3') 
+        conn = sqlite3.connect('D:/github_repo/智能产线综合应用实训/line/myproject/db.sqlite3') 
         cursor = conn.cursor()
 
         # 2. 执行查询 SQL
