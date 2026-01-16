@@ -23,7 +23,14 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import RedirectView
 urlpatterns = [
+    # 添加这一行：将根路径 '/' 永久重定向到 '/myline/index'
+    # 修改这里：将根路径 '/' 重定向到 '/myline/index'
+    path('', RedirectView.as_view(url='/myline/index', permanent=False), name='index_redirect'),
+     #permanent=True: 这会发送 HTTP 301 状态码。如果你只是临时测试，
+    # 或者希望浏览器每次都重新请求服务器而不是使用缓存，可以将其改为 False（发送 302 状态码）。
+    
     path("myline/", include("myline.urls")),
+    
     #path("polls/", include("polls.urls")),# 当包括其它 URL 模式时你应该总是使用 include() ， admin.site.urls 是唯一例外。
     path('admin/', admin.site.urls),
 ]
