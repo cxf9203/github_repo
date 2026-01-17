@@ -42,8 +42,13 @@ def ToHexStr(num):
     hexStr = chaDic.get(num, str(num)) + hexStr
     return hexStr
 
+"""连接数据库day4"""
+# 数据库文件名 #todo 修改为你的数据库地址
+db_file = 'D:/github_repo/智能产线综合应用实训/line/myproject/db.sqlite3'
+
 Stand_color = "RED"
 Stand_shape = "CIRCLE"
+
 
 global deviceList
 deviceList = MV_CC_DEVICE_INFO_LIST()
@@ -369,6 +374,32 @@ while True:
                         res = "not"
                         res = res.encode()
                         conn.send(res)  # 发送消息给ABB工业机器人客户端   
+                        #day4 采集到数据库
+                        #将相关参数插入到数据库中sqlite3
+                        try:
+                            # 1. 计算合格率 (防止除以0的错误)
+                            if count == 0:
+                                rate = 0.0
+                            else:
+                                rate = ok_count / count
+
+                            # 2. 连接数据库
+                            conn = sqlite3.connect(db_file)
+                            cursor = conn.cursor()
+
+                            # 3. SQL 插入语句
+                            # 注意：我们使用 ? 作为占位符，这是防止 SQL 注入的安全做法
+                            sql = "INSERT INTO myline_workinghistory (device_id_id,number_history, good_number) VALUES (?, ?, ?)"
+                            
+                            # 4. 执行 SQL
+                            # 参数顺序必须与 SQL 中的占位符顺序一致
+                            cursor.execute(sql, (1, count, ok_count))
+                            
+                            # 5. 提交事务并关闭连接
+                            conn.commit()
+                            
+                        except sqlite3.Error as e:
+                            print(f"数据库插入错误: {e}")
                         
                 else:
                     conn.send(str_msg)

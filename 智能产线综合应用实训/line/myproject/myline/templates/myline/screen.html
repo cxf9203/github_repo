@@ -1,0 +1,413 @@
+{% load static %}
+<!doctype html>
+<html>
+<head>
+<!doctype html>
+<html>
+<head>
+
+<meta charset="utf-8">
+<meta name="description" content="">
+<meta name="keywords" content="">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>智能产线综合应用实训 大屏</title>
+
+<link type="text/css" href="{% static 'myline/screen/css/public.css' %}" rel="stylesheet">
+<link type="text/css" href="{% static 'myline/screen/css/icon.css' %}" rel="stylesheet">
+<link type="text/css" href="{% static 'myline/screen/css/index.css' %}" rel="stylesheet">
+<script type="text/javascript">
+        document.documentElement.style.fontSize = document.documentElement.clientWidth /768*100 + 'px';
+</script>
+<script src="{% static 'myline/js/echarts.js' %}"></script>
+<script src="{% static 'myline/screen/js/jquery-1.11.0.min.js' %}" type="text/javascript"></script>
+<script src="{% static 'myline/screen/js/jquery.numscroll.js' %}" type="text/javascript" charset="utf-8"></script>
+</head>
+<style>
+.abc{
+}
+
+</style>
+
+<body>
+<div class="bg">
+	<div class="title">机器人产线数据大屏</div>
+    <div class="leftMain">
+    	<div class="leftMain_top">
+        	<div class="leftMain_topIn">
+            	<ul>
+
+                	
+                	<li>
+                        <div class="liIn">
+                            <h3> 机器人:1</h3>
+
+                            <div class="zi">
+                                <span class="span1"></span>
+                                <p class="shu">
+                                    <span class="shu1">123123</span>
+                                    <i>次</i>
+                                <i>运行状态 ：连接</i>
+                                </p>
+
+                            </div>
+                            <span class="border_bg_leftTop"></span>
+                            <span class="border_bg_rightTop"></span>
+                            <span class="border_bg_leftBottom"></span>
+                            <span class="border_bg_rightBottom"></span>
+                        </div>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="h5 mb-4 font-weight-bold" style="color:white;"></div>
+
+                  <div class="panel-body">
+                        <!-- 为 ECharts 准备一个定义了宽高的 DOM -->
+                        <div id="chart1" style="width: 1000px;height:220px;"></div>
+                  </div>
+                        
+        </div>
+        <div class="leftMain_middle">
+        	<div class="leftMain_middle_left">
+            	<div class="leftMain_middle_leftIn">
+
+                    <div class="biaoge" style="width:100%; height:25vh" id="chart3"></div>
+                    <span class="border_bg_leftTop"></span>
+                    <span class="border_bg_rightTop"></span>
+                    <span class="border_bg_leftBottom"></span>
+                    <span class="border_bg_rightBottom"></span>
+                </div>
+            </div>
+        	<div class="leftMain_middle_right">
+            	<div class="leftMain_middle_rightIn">
+                	<h3>设备概览</h3>
+                    <div class="biaoge biaoge_bi" style="width:100%; height:25vh">
+                    	<ul>
+                        	<li>
+                            	<div class="liIn">
+                                	<p class="shu shu1">123</p>
+                                    <p class="zi">需更换配件数</p>
+                                </div>
+                            </li>
+                        	<li>
+                            	<div class="liIn">
+                                	<p class="shu shu2">6</p>
+                                    <p class="zi">连接设备数</p>
+                                </div>
+                            </li>
+                        	<li>
+                            	<div class="liIn">
+                                	<p class="shu shu3">100007</p>
+                                    <p class="zi">昨日冲压数</p>
+                                </div>
+                            </li>
+                        	<li>
+                            	<div class="liIn">
+                                	<p class="shu shu4">12.1</p>
+                                    <p class="zi">需更换配件比例%</p>
+                                </div>
+                            </li>
+                        	<li>
+                            	<div class="liIn">
+                                	<p class="shu shu5">100</p>
+                                    <p class="zi">设备链接比例%</p>
+                                </div>
+                            </li>
+                        	<li>
+                            	<div class="liIn">
+                                	<p class="shu shu6">6</p>
+                                    <p class="zi">设备总数量</p>
+                                </div>
+                            </li>
+                        </ul>
+
+                    </div>
+                    <span class="border_bg_leftTop"></span>
+                    <span class="border_bg_rightTop"></span>
+                    <span class="border_bg_leftBottom"></span>
+                    <span class="border_bg_rightBottom"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="rightMain">
+        <div class="rightMain_top">
+            <div class="rightMain_topIn">
+
+                <div class="biaoge" style="width:100%; height:30vh" id="chart5"></div>
+
+                <span class="border_bg_leftTop"></span>
+                <span class="border_bg_rightTop"></span>
+                <span class="border_bg_leftBottom"></span>
+                <span class="border_bg_rightBottom"></span>
+            </div>
+         </div>
+        <div class="rightMain_bottom">
+            <div class="rightMain_bottomIn">
+                <h3>需替换配件表</h3>
+                <div class="biaoge biaoge_list" style="width:100%; height:36vh">
+
+                    	<ul class="ul_title">
+                        	<li>配件名</li>
+                            <li>所在模具</li>
+                            <li>所在设备</li>
+                            <li>冲压数</li>
+                            <li>操作</li>
+
+                        </ul>
+                        <div class="ul_list">
+                        	<div class="ul_listIn">
+
+                            </div>
+
+                   </div>
+
+                </div>
+                <span class="border_bg_leftTop"></span>
+                <span class="border_bg_rightTop"></span>
+                <span class="border_bg_leftBottom"></span>
+                <span class="border_bg_rightBottom"></span>
+            </div>
+         </div>
+    </div>
+    <div style="clear:both;"></div>
+</div>
+<!--青 岛 研 锦 网 络 科 技 有 限 公 司   版权所有-->
+<!--数字增长累加动画-->
+
+<script type="text/javascript">
+	$(".shu1").numScroll();
+	$(".shu2").numScroll();
+	$(".shu3").numScroll();
+	$(".shu4").numScroll();
+	$(".shu5").numScroll();
+	$(".shu6").numScroll();
+
+	/*$(".shu1").numScroll({
+		time:5000
+	});*/
+
+</script>
+<!--<script src="{% static 'myline/screen/js/echarts.min.js' %}"></script>-->
+
+<script type="text/javascript">
+
+             $(function (){
+                initBar();
+                initPielist();
+                initLine();
+                initchart5();
+             })
+
+             function initBar(){
+                  // 基于准备好的dom，初始化echarts实例
+                  var myChart = echarts.init(document.getElementById('chart1'));
+                  // 指定图表的配置项和数据
+                  var option = {
+                  tooltip: {
+                            trigger: 'item'
+                          },
+                        textStyle:{color : "rgba(25, 255, 255, 1)"},
+                        xAxis: {},
+                          yAxis: {
+                          max: 'dataMax'},
+                          series: [],
+                          legend: {
+                            show: true,
+                            textStyle: {
+                              color: "rgba(255, 255, 7255, 1)"
+                            }
+                          },
+                          animationDuration: 0,
+                          animationDurationUpdate: 3000,
+                          animationEasing: 'linear',
+                          animationEasingUpdate: 'linear'
+                           };
+                           setInterval(function(){
+                           $.ajax({
+                                url:"/myline/chart_bar/",
+                                type:"get",
+                                dataType:"JSON",
+                                success:function(res){
+                                    // 使用刚指定的配置项和数据显示图表。
+                                    if (res.status){
+                                        option.series= res.data.series;
+                                        option.xAxis= res.data.xAxis
+                                    }
+                                     myChart.setOption(option);
+                                }
+                  })
+                  },15000)
+             }
+             function initPielist(){
+             // 基于准备好的dom，初始化echarts实例
+                  var myChart = echarts.init(document.getElementById('chart3'));
+                  // 指定图表的配置项和数据
+                  var option = {
+                       title: [],
+                       tooltip: {},
+                      series: []
+                };
+
+             $.ajax({
+                    url:"/myline/chart_pielist/",
+                    type:"get",
+                    dataType:"JSON",
+                    success:function(res){
+                        // 使用刚指定的配置项和数据显示图表。
+                        if (res.status){
+                            option.series= res.data.series;
+                            option.title= res.data.title;
+
+                        }
+                        myChart.setOption(option);
+                    }
+                  })
+             }
+             function initLine(){
+             // 基于准备好的dom，初始化echarts实例
+                  var myChart = echarts.init(document.getElementById('chart2'));
+                  // 指定图表的配置项和数据
+                  var option = {
+
+                        title: {
+                                text: ''
+                              },
+                              tooltip: {
+                                trigger: 'axis',
+                                axisPointer: {
+                                  type: 'cross',
+                                  label: {
+                                    backgroundColor: '#6a7985'
+                                  }
+                                }
+                              },
+                              legend: {},
+                              toolbox: {
+                                feature: {
+                                  saveAsImage: {}
+                                }
+                              },
+                              grid: {
+                                left: '3%',
+                                right: '4%',
+                                bottom: '3%',
+                                containLabel: true
+                              },
+                              xAxis: [
+                                {
+                                  type: 'category',
+                                  boundaryGap: false,
+                                  data: [],
+                                   axisLabel: {
+                                          color: "rgba(245, 23, 23, 1)"
+                                        }
+                                }
+                              ],
+                              yAxis: [
+                                {
+                                  type: 'value',
+                                  axisLabel: {
+                                        color: "rgba(255, 255, 255, 1)"
+                                      }
+
+                                }
+                              ],
+                              series: []
+                    };
+                        $.ajax({
+                    url:"/myline/chart_line/",
+                    type:"get",
+                    dataType:"JSON",
+                    success:function(res){
+                        // 使用刚指定的配置项和数据显示图表。
+                        if (res.status){
+                            option.legend = res.data.legend;
+                            option.xAxis.data = res.data.xAxis;
+                            option.series= res.data.series;
+
+                        }
+                        myChart.setOption(option);
+                    }
+                  })
+             }
+             function initchart5(){
+                 // 基于准备好的dom，初始化echarts实例
+                      var myChart = echarts.init(document.getElementById('chart5') );
+                      option = {
+                        tooltip: {
+                            trigger: 'item'
+                          },
+                          legend: {
+                            top: '5%',
+                            left: 'center',
+                            textStyle: {
+                                    "color": "rgba(255, 255, 255, 1)",
+                                    fontSize: 10,
+                                }
+                          },
+                          series: [
+                            {
+                              name: '次数',
+                              type: 'pie',
+                              radius: ['40%', '50%'],
+                              avoidLabelOverlap: false,
+                              itemStyle: {
+                                borderRadius: 10,
+                                borderColor: '#fff',
+                                borderWidth: 2
+                              },
+                              label: {
+                                show: false,
+                                position: 'center'
+                              },
+                              emphasis: {
+                                label: {
+                                  show: true,
+                                  fontSize: 40,
+                                  fontWeight: 'bold'
+                                }
+                              },
+                              labelLine: {
+                                show: false
+                              },
+                              data: []
+                            }
+                          ]
+                    };
+                 $.ajax({
+                        url:"/myline/gauge_chart/",
+                        type:"get",
+                        dataType:"JSON",
+                        success:function(res){
+                            // 使用刚指定的配置项和数据显示图表。
+                            if (res.status){
+                            option.series = res.data.series;
+                        }
+                            myChart.setOption(option);
+                        }
+                      })
+             }
+            function clickMe(){
+        console.log("点击了按钮");
+        $.ajax({
+            url:"/myline/part_change_ajax/",
+            type:"post",
+            data:{
+               n1:123,
+               n2:456
+            },
+            dataType:"JSON",
+            success:function(res){
+                console.log(res);
+                console.log(res.date);
+                console.log(res.age);
+            }
+        })
+    }
+         </script>
+<!--青 岛 研 锦 网 络 科 技 有 限 公 司   版权所有-->
+</body>
+</html>

@@ -1,0 +1,100 @@
+{% extends 'layout.html' %}
+{% block content %}
+<!-- End Navbar -->
+  <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        .button-row {
+            margin: 20px 0;
+        }
+.button-row a {
+            display: inline-block; /* 使链接以块级元素显示 */
+            margin-right: 10px; /* 在链接之间添加一些间距 */
+            padding: 10px 15px; /* 按钮内边距 */
+            color: white; /* 字体颜色为白色 */
+            text-decoration: none; /* 去掉下划线 */
+            border-radius: 5px; /* 圆角效果 */
+        }
+        .button-row a:nth-child(1) {
+            background-color: green; /* 第一个按钮背景色为绿色 */
+        }
+        .button-row a:nth-child(2) {
+            background-color: red; /* 第二个按钮背景色为红色 */
+        }
+        .button-row a:nth-child(3) {
+            background-color: blue; /* 第三个按钮背景色为蓝色 */
+        }
+    </style>
+<div class="container">
+		<div style = "margin-bottom:160px">
+            <a>设备管理</a>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+			    <div>
+                    <a class="btn btn-primary" href="/myline/robot_list">机器人设备</a>
+                    <a class="btn btn-primary" href="/myline/add_robot">新增机器人设备</a>
+                </div>
+
+          <div class="panel-body">
+
+
+            <!-- Table -->
+          <table class="table table-bordered">
+        <thead>
+          <tr>
+
+              <th>设备名称</th>
+              <th>设备编号</th>
+              <th>IP地址</th>
+              <th>实时产量</th>
+              <th>良品产量</th>
+              <th>设备状态</th>
+              <th>节拍</th>
+              <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+		{% for obj in queryset%}
+          <tr>
+
+              <td>{{obj.abbrobot_name}}</td>
+              <td>{{obj.abbrobot_number}}</td>
+              <td>{{obj.ip_address}}</td>
+              <td>{{obj.real_product_number}}</td>
+              <td>{{obj.good_product_number}}</td>
+              <td>{{obj.working_state}}</td>
+              <td>{{obj.cycle_time}}</td>
+                <td  class="button-row">
+
+                        <a class="btn btn-sm btn-info btn-round mb-1" href="/myline/{{obj.id}}/stop_abb/">停止 </a>
+                        <a class="btn btn-sm btn-info btn-round mb-1" href="/myline/{{obj.id}}/maintain_abb/">维护设备</a>
+                    
+
+
+
+
+                </td>
+
+          </tr>
+
+		{% endfor %}
+        </tbody>
+      </table>
+
+          </div>
+        </div>
+
+        </div>
+</div>
+
+
+
+{% endblock  %}

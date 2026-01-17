@@ -1,0 +1,104 @@
+{% extends 'layout.html' %}
+{% block content %}
+<!-- End Navbar -->
+
+<style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .pagination {
+            margin-top: 20px;
+        }
+    </style>
+<div class="container">
+		<div style = "margin-bottom:160px">
+            <a>历史数据</a>
+        </div>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+			  <a class="btn btn-primary" href="/myline/workinghistory/" target="_blank">设备数据</a>
+                <a class="btn btn-primary" href="/myline/screen/" target="_blank">大屏</a>
+          <div class="panel-body">
+            <!-- Table -->
+
+
+
+          <table class="table table-bordered">
+        <thead>
+          <tr>
+
+              <th>机器人名字</th>
+              <th>运行数量</th>
+              <th>良品数量</th>
+              <th>工作状态</th>
+              <th>更新时间</th>
+             
+          </tr>
+        </thead>
+        <tbody>
+		{% for obj in page_objects%}
+          <tr>
+
+              <td>{{obj.abbrobot_name}}</td>
+              <td>{{obj.number_history}}</td>
+              <td>{{obj.good_number}}</td>
+               <td>{{obj.get_working_state_display}}</td>
+              <td>{{obj.update_date|date:"Y年m月d日 h:i"}}</td>
+                
+                {% empty %}
+                <tr>
+                    <td colspan="3">No results found.</td> <!-- 根据字段数调整 colspan -->
+                </tr>
+          </tr>
+
+		{% endfor %}
+        </tbody>
+      </table>
+
+
+          </div>
+        </div>
+
+        </div>
+
+
+   <!-- 分页链接 -->
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_objects.has_previous %}
+                <a href="?page=1">&laquo; 第一页</a>
+                <a href="?page={{ page_objects.previous_page_number }}">前一页</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ page_objects.number }} of {{ page_objects.paginator.num_pages }}.
+            </span>
+
+            {% if page_objects.has_next %}
+                <a href="?page={{ page_objects.next_page_number }}">后一页</a>
+                <a href="?page={{ page_objects.paginator.num_pages }}">最后一页 &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+
+
+
+
+
+
+
+
+</div>
+
+
+
+{% endblock  %}
