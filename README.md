@@ -100,12 +100,52 @@ github_repo/
 - 可以通过`http://localhost:8000/admin/`访问Django管理后台进行数据管理
 ### 这时你应该可以看到主页，并且应该可以访问大屏 screen 了
 
+### 3.设备检查
+- 检查机器人设备是否完好，能否运行？
+- 检查工业相机是否能正常运行？
+- 各设备间网络通讯是否正常？
+#### 设备通讯检查
+- 将相机网线插入台面交互机RJ45接口（网口）
+- 将电脑（个人电脑）网线插入台面交换机RJ接口（网口）
+- 设置电脑ip地址 192.168.101.222
+- 工业机器人ip地址为 192.168.101.100 （不需要进行设置）
+- 西门子PLC  ip 地址为 192.168.101.13（不需要进行设置）
+
+- 可以在电脑上 ping 上述工业机器人ip地址，查看是否有连接反馈
+#### MVS 海康相机抓图取流
+- 相机抓图取流
+- 焦距设置
+- 曝光时间
+- 触发模式
+
+
 ## DAY2 使用说明
 ### 1.编写ABB实体工业机器人 ，使用socket 机器人与PC 电脑进行通信
 - 实现调试好海康工业相机，IP设置、焦距等
 - 运行`socket_vision_with_hik.py`脚本，测试Socket通信功能，并与机器人完成简单视觉处理任务实现Socket+海康相机视觉处理功能
 - 编写好机器人程序，实现机器人与PC 电脑进行通信
-
+- 下列为机器人参考程序，确保ip同频段
+    PROC Routine1()
+        MoveJ p20, v1000, z50, tool0;
+        SocketClose socket1; 
+        SocketCreate socket1;
+        SocketConnect socket1, "169.254.99.152", 8005;
+        SocketSend socket1\Str:="pic";
+        WaitTime 2;
+        SocketReceive socket1\Str:=string1;WaitTime 1;TPWrite string1;
+        IF string1 = "ok" THEN
+            MoveJ p10, v1000, z50, tool0;
+            OK_routine;
+        ELSE
+            MoveJ p30, v1000, z50, tool0;
+            NG_routine;
+        ENDIF
+    ENDPROC
+    
+### 任务
+- 根据任务，修改python 程序，实现颜色检测、形状识别等视觉处理功能（自行尝试AI检测，不拓展）
+任务说明，料仓回随机推料出不同颜色，不同形状的配件，根据事先设置，只选择红色圆形为OK 并进行OK_routine;而其他颜色和形状皆为NG，进行 NG_routine;其中，OK_routine;和NG_routine;为事先编写好的机器人程序，分别实现机器人抓取OK和NG的配件，并放置到不同的位置。
+- ！！！！！完成后小组保存该程序，供后续汇报答辩时 实际操作演示使用。
 
 ## DAY3 使用说明
 ### 1.编写Django框架的Web管理系统
@@ -114,15 +154,62 @@ github_repo/
 
 ### 2. 定义好数据库模型
 - 在`models.py`文件中定义`abbrobot`和`WorkingHistory`模型，分别用于存储机器人信息和工作历史记录
+- 使用Django的ORM（对象关系映射）功能，实现数据库的创建、迁移和查询操作
+- 使用makemigrations和migrate命令，将模型定义应用到数据库中，否则数据库中不会新建该模型表
+- 在`admin.py`文件中注册模型，以便在Django管理后台中管理这些模型
+- 在`views.py`文件中编写视图函数时，可以插入 在`models.py`文件中定义的`abbrobot`和`WorkingHistory`模型，实现机器人设备列表、添加、历史记录查询等功能
+
 
 ### 3. 编写URL路由（事先在你需要的html中设定好url）
 - 在`urls.py`文件中编写URL路由，将视图函数与URL路径进行映射，实现页面跳转和功能调用
+
 ### 4. 编写视图函数
 - 在`views.py`文件中编写视图函数，实现机器人设备列表、添加、历史记录查询等功能
 - 实现数据可视化展示，支持机器人参数配置
+- view函数的功能说明
+    def index(request):
+        return render(request, 'myline/index.html')
+    def screen(request):
+        return render(request, 'myline/screen.html')
+    def robot_list(request):
+        robots = abbrobot.objects.all()
+        return render(request, 'myline/robot_list.html', {'robots': robots})
+    根据你在url中view函数的名称，来定义你的view函数
+    path('index/', views.index, name="index"),
+    path('screen/', views.screen, name="screen"),
+    path('robot_list/', views.robot_list, name="robotlist"),
+    path('add_robot/', views.add_robot, name="add_robot")
+    有了view函数功能定义后，你就可以在html中调用这些功能了，并且也可以向html中传递参数了，例如：
+            <td>{{ robot.id }}</td>
+            <td>{{ robot.abbrobot_name }}</td>
+            <td>{{ robot.abbrobot_number }}</td>
+            <td>{{ robot.ip_address }}</td>
+            <td>{{ robot.real_product_number }}</td>
+            <td>{{ robot.good_product_number }}</td>
+            <td>{{ robot.working_state }}</td>
+            <td>{{ robot.cycle_time }}</td>
+            <td>{{ robot.update_date }}</td>
+           
+
 
 ### 5. 编写模板文件
 - 在`templates/myline/`目录下编写模板文件，实现页面布局和数据展示
+- 在模板文件中调用视图函数传递的参数，实现动态数据展示
+- 使用Bootstrap框架，实现响应式布局和样式美化
+- 使用JavaScript和AJAX技术，实现页面局部刷新和数据动态更新
+- 使用Django模板语言，实现条件判断和循环遍历等逻辑处理
+- 使用Django表单，实现用户输入和表单验证功能
+- 使用Django分页，实现数据分页展示功能
+- 使用Django消息框架，实现用户通知和提示功能
+- 使用Django缓存，实现页面缓存和数据缓存功能
+### 任务
+- ！！！！任务1：请在程序中找到相关的bootstrap，JavaScript，AJAX，Django模板语言，Django表单，Django分页，解释该作用，并记录该技术方法，在汇报答辩中准备讲解回答。
+任务2：在本项目中，继续创建一个PLC model 模型，用来管理plc设备的添加 和设备列表显示。
+该模型名字为 plcdevice，包含字段：plcdevice_name,plcdevice_number,ip_address,real_product_number,good_product_number,working_state,cycle_time,update_date。
+记得makemigrations 和migrate。
+- ！！！！任务3：请在layout.html中，找个合适位置来添加新建plc设备的路由，并在urls.py中继续添加一个plcdevice的url路由，并编写相关的view函数，实现plcdevice的添加和列表显示。
+- ！！！！任务4：请创建一个plcdevice的html模板，并编写相关的html代码，实现plcdevice的添加和列表显示。
+- ！！！！！完成后小组保存该程序，供后续汇报答辩时 实际操作演示使用。
 
 ### 6. 启动服务
 - 运行`启动服务.bat`脚本，启动Django开发服务器
@@ -135,13 +222,17 @@ github_repo/
 - 使用`day4查看数据库中所有的表.py`脚本查看数据库中所有的表
 - 使用`day4查看该数据表.py`脚本查看指定数据表的内容
 
-### 2. 完善day4socket_vision_with_hik.py 程序
-- 完善day4socket_vision_with_hik.py 程序，实现机器人与PC 电脑进行通信与视觉处理，
+
+### 2. 任务 ：完善day4socket_vision_with_hik.py 程序
+- ！！！！完善day4socket_vision_with_hik.py 程序，实现机器人与PC 电脑进行通信与视觉处理，
 并根据表结构，将视觉处理结果插入历史工作数据库 `myline_workinghistory `
+- ！！！！！完成后小组保存该程序，供后续汇报答辩时 实际操作演示使用。
 
 ### 3. 启动服务
 - 运行`启动服务.bat`脚本，启动Django开发服务器
 - 在浏览器中访问`http://localhost:8000/`查看系统界面
+- 机器人在请求视觉处理时，PC 电脑会自动将处理结果插入历史工作数据库 `myline_workinghistory`
+- 在浏览器中访问`http://localhost:8000/workinghistory/`查看历史工作记录
 
 
 ## DAY5 总结
@@ -215,11 +306,6 @@ github_repo/
 - 准备演示脚本，包括操作步骤和讲解要点
 - 测试演示环境，确保网络、电源等正常
 - 准备演示数据的备份
-
-
-
-
-
 
 
 
