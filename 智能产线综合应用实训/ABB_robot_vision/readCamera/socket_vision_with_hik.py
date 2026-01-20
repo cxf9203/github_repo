@@ -42,8 +42,8 @@ def ToHexStr(num):
     hexStr = chaDic.get(num, str(num)) + hexStr
     return hexStr
 
-Stand_color = "RED"
-Stand_shape = "CIRCLE"
+Stand_color = "RED" #判断标准RED
+Stand_shape = "CIRCLE" #判断标准圆形
 
 global deviceList
 deviceList = MV_CC_DEVICE_INFO_LIST()
@@ -406,5 +406,3 @@ except:
     pass
 
 cv2.destroyAllWindows()
-# 关闭数据库连接
-conn.close()
