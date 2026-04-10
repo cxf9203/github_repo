@@ -19,7 +19,10 @@ github_repo/
     │   │   │   ├── MvErrorDefine_const.py     # 错误定义常量
     │   │   │   └── PixelType_header.py        # 像素类型头文件
     │   │   ├── cvReadCam.py          # OpenCV读取相机
-    │   │   ├── day4_socket_vision_with_hik.py  # 第4天
+    │   │   ├── day4_socket_vision_with_hik.py  # 第4天：Socket+海康相机视觉处理（无UI版本）
+    │   │   ├── day4_socket_vision_with_hikUI.py  # 第4天：Socket+海康相机视觉处理（带UI版本）
+    │   │   ├── mainUI.py             # 主界面UI类
+    │   │   ├── mainUI.ui            # 主界面UI设计文件
     │   │   ├── socket_vision_with_hik.py      # 主程序：Socket+海康相机视觉处理（第2天）
     │   │   └── 海康机器人USB3.0工业面阵相机用户手册V2.2.1.pdf
     │   └── sockettest_optimized.py   # Socket测试程序
@@ -241,13 +244,35 @@ github_repo/
 - 使用`day4查看数据库中所有的表.py`脚本查看数据库中所有的表
 - 使用`day4查看该数据表.py`脚本查看指定数据表的内容
 
-
-### 2. 任务 ：完善day4socket_vision_with_hik.py 程序
-- ！！！！完善day4socket_vision_with_hik.py 程序，实现机器人与PC 电脑进行通信与视觉处理，
+### 2. 任务 ：完善day4_socket_vision_with_hik.py 程序
+- ！！！！完善day4_socket_vision_with_hik.py 程序，实现机器人与PC 电脑进行通信与视觉处理，
 并根据表结构，将视觉处理结果插入历史工作数据库 `myline_workinghistory `
 - ！！！！！完成后小组保存该程序，供后续汇报答辩时 实际操作演示使用。
 
-### 3. 启动服务
+### 3. 任务：使用带UI版本的视觉处理程序 day4_socket_vision_with_hikUI.py
+- day4_socket_vision_with_hikUI.py 是带UI界面的版本，相比无UI版本具有以下特点：
+  - 使用PySide6框架创建图形用户界面
+  - 将socket通信和视觉处理功能放到后台线程运行
+  - 主界面线程负责显示图像和用户交互
+  - 通过信号槽机制实现线程间通信
+  - 实时显示相机采集的图像和视觉处理结果
+
+- 程序架构说明：
+  - **MainWindow类**：继承自QMainWindow和Ui_MainWindow，负责主界面的显示和交互
+  - **CameraThread类**：继承自QThread，负责相机图像采集，通过image_ready信号将图像发送到主界面
+  - **SocketThread类**：继承自QThread，负责socket通信和视觉处理，通过image_ready信号将处理结果发送到主界面
+
+- 使用方法：
+  1. 确保已安装PySide6：`pip install PySide6`
+  2. 运行程序：`python day4_socket_vision_with_hikUI.py`
+  3. 程序会自动枚举并打开相机
+  4. 主界面会实时显示相机采集的图像
+  5. 当机器人发送"pic"请求时，程序会进行视觉处理并将结果显示在主界面
+  6. 处理结果会通过socket发送回机器人
+
+- ！！！！！完成后小组保存该程序，供后续汇报答辩时 实际操作演示使用。
+
+### 4. 启动服务
 - 运行`启动服务.bat`脚本，启动Django开发服务器
 - 在浏览器中访问`http://localhost:8000/`查看系统界面
 - 机器人在请求视觉处理时，PC 电脑会自动将处理结果插入历史工作数据库 `myline_workinghistory`

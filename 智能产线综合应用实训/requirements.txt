@@ -1,3 +1,5 @@
 #安装Django ，modbus_tk 库
 Django
 modbus_tk
+#官方qt 无版权纠纷
+pyside6

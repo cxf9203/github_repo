@@ -17,6 +17,11 @@ from MvImport.CameraParams_header import *
 import cv2
 import numpy as np
 import threading
+
+from PySide6.QtWidgets import QApplication, QMainWindow
+from PySide6.QtCore import Qt, QThread, Signal
+from PySide6.QtGui import QImage, QPixmap
+from mainUI import Ui_MainWindow
 #创建全局图像变量img
 img = None
 # 获取选取设备信息的索引，通过[]之间的字符去解析
@@ -198,6 +203,7 @@ def work_thread():
     stPayloadSize = MVCC_INTVALUE_EX()
 
     while True:
+        time.sleep(1)
         ret_temp = obj_cam_operation.obj_cam.MV_CC_GetIntValueEx("PayloadSize", stPayloadSize)
         if ret_temp != MV_OK:
             print("error")
@@ -230,8 +236,9 @@ def work_thread():
             """
 
         #ch: 将图片变为OpenCV可读类型 | en: convert image type to make it readable by OpenCV
-        img0 = Color_numpy(buf_save_image,stFrameInfo.nWidth,stFrameInfo.nHeight) #先转成opencv格式的numpy数组图像格式
-        img = cv2.resize(img0, None, fx=1/4, fy=1/4)
+        img = Color_numpy(buf_save_image,stFrameInfo.nWidth,stFrameInfo.nHeight) #先转成opencv格式的numpy数组图像格式
+        cv2.imshow("img",img)
+        cv2.waitKey(1)
 
         
 
@@ -305,137 +312,234 @@ def isImg_ok(my_img):
 def getImg():
     global img
     return img
+def socket_work():
+    global img
+    ###setting###
+    str_msg = 'hello ABBrobotware    '  # 修改变量名，避免与内置函数str冲突
+    str_ok = 'ok'
+    str_NG = 'NG'
+    str_msg = str_msg.encode() #encode 解码发送
+    str_ok = str_ok.encode()
+    str_NG = str_NG.encode()
+    result = False
 
-###setting###
-str_msg = 'hello ABBrobotware    '  # 修改变量名，避免与内置函数str冲突
-str_ok = 'ok'
-str_NG = 'NG'
-str_msg = str_msg.encode() #encode 解码发送
-str_ok = str_ok.encode()
-str_NG = str_NG.encode()
-result = False
+    # 创建socket对象并设置选项
+    s = socket.socket()  # 创建 socket 对象，s
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # 允许地址重用
+    host = socket.gethostname()  # 获取本地主机名     #实体机器人和虚拟机器人ip不一样要注意下
+    #host = "192.168.100.1"
+    port = 8005  # 设置端口
+    print(host)
+    s.bind((host, port))        # 绑定端口
+    print(s)
+    s.listen(30)  # 开始监听，移到循环外
 
-# 创建socket对象并设置选项
-s = socket.socket()  # 创建 socket 对象，s
-s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)  # 允许地址重用
-host = socket.gethostname()  # 获取本地主机名     #实体机器人和虚拟机器人ip不一样要注意下
-#host = "192.168.100.1"
-port = 8005  # 设置端口
-print(host)
-s.bind((host, port))        # 绑定端口
-print(s)
-s.listen(30)  # 开始监听，移到循环外
+    #cap = cv2.VideoCapture(0)此为摄像机读取，取消注释完成摄像机开启
 
-#cap = cv2.VideoCapture(0)此为摄像机读取，取消注释完成摄像机开启
+    print("等待客户端连接...")
+    #初始化本次运行视觉处理标准参数
+    count = 0
+    ok_count = 0
+    while True:
+        #用户输入"q"停止服务
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+        try:
+            conn, addr = s.accept()     # 建立客户端连接
+            print(f"客户端已连接: {addr}")
 
-print("等待客户端连接...")
-#初始化本次运行视觉处理标准参数
-count = 0
-ok_count = 0
-while True:
-    #用户输入"q"停止服务
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
-    try:
-        conn, addr = s.accept()     # 建立客户端连接
-        print(f"客户端已连接: {addr}")
+            while True:
+                #用户输入"q"停止服务
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
+                try:
+                    data = conn.recv(8005)  # 接收数据
+                    if not data:  # 如果没有接收到数据，说明客户端已断开连接
+                        print("客户端主动断开连接")
+                        break
 
-        while True:
-            #用户输入"q"停止服务
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-            try:
-                data = conn.recv(8005)  # 接收数据
-                if not data:  # 如果没有接收到数据，说明客户端已断开连接
-                    print("客户端主动断开连接")
+                    data = data.decode() #对接受的数据解码
+                    print('接收到:', data)# 打印接收到的解码数据
+                    img_ori = getImg()
+                    if data == "ready":
+                        txt = input("请输入信息，格式为 44.2,23.9,0.0\0D")
+                        txt = txt.encode()
+                        conn.send(txt)  # 发送消息给ABB工业机器人客户端
+                    #todo 学生作业请在下面生成图像处理代码，作业时请删除 pass
+                    elif data == "pic":
+                        
+                        #todo  读取一张图片
+                        #frame = cap.read()  # 读取一帧图像
+                        img = getImg()
+                        result = isRedcolor(img)
+                        #todo  根据识别结果发送不同的消息给ABB工业机器人客户端
+                        if result == True:  #回调函数返回的result值
+                            res = "red"
+                            res = res.encode()
+                            conn.send(res)  # 发送消息给ABB工业机器人客户端
+                        
+                        else:
+                            res = "not"
+                            res = res.encode()
+                            conn.send(res)  # 发送消息给ABB工业机器人客户端   
+                            #day4 采集到数据库
+                            #将相关参数插入到数据库中sqlite3
+                            try:
+                                # 1. 计算合格率 (防止除以0的错误)
+                                if count == 0:
+                                    rate = 0.0
+                                else:
+                                    rate = ok_count / count
+
+                                # 2. 连接数据库
+                                conn = sqlite3.connect(db_file)
+                                cursor = conn.cursor()
+
+                                # 3. SQL 插入语句
+                                # 注意：我们使用 ? 作为占位符，这是防止 SQL 注入的安全做法
+                                sql = "INSERT INTO myline_workinghistory (device_id_id,number_history, good_number) VALUES (?, ?, ?)"
+                                
+                                # 4. 执行 SQL
+                                # 参数顺序必须与 SQL 中的占位符顺序一致
+                                cursor.execute(sql, (1, count, ok_count))
+                                
+                                # 5. 提交事务并关闭连接
+                                conn.commit()
+                                
+                            except sqlite3.Error as e:
+                                print(f"数据库插入错误: {e}")
+                            
+                    else:
+                        conn.send(str_msg)
+
+                    #isImg_ok(frame)   #调用函数，处理frame图片
+                    #if result == True:  #回调函数返回的result值
+                    #    conn.send(str_ok)  #PC端发送结果给ABB工业机器人
+                # else:
+                    #    conn.send(str_NG)  #PC端发送结果给ABB工业机器人
+
+                except ConnectionResetError:
+                    print('客户端连接被重置')
+                    break
+                except BrokenPipeError:
+                    print('管道破裂，连接已断开')
+                    break
+                except Exception as e:
+                    print(f'发生未知错误: {str(e)}')
                     break
 
-                data = data.decode() #对接受的数据解码
-                print('接收到:', data)# 打印接收到的解码数据
-                img_ori = getImg()
-                if data == "ready":
-                    txt = input("请输入信息，格式为 44.2,23.9,0.0\0D")
-                    txt = txt.encode()
-                    conn.send(txt)  # 发送消息给ABB工业机器人客户端
-                #todo 学生作业请在下面生成图像处理代码，作业时请删除 pass
-                elif data == "pic":
-                    
-                    #todo  读取一张图片
-                    #frame = cap.read()  # 读取一帧图像
-                    img = getImg()
-                    result = isRedcolor(img)
-                    #todo  根据识别结果发送不同的消息给ABB工业机器人客户端
-                    if result == True:  #回调函数返回的result值
-                        res = "red"
-                        res = res.encode()
-                        conn.send(res)  # 发送消息给ABB工业机器人客户端
-                       
-                    else:
-                        res = "not"
-                        res = res.encode()
-                        conn.send(res)  # 发送消息给ABB工业机器人客户端   
-                        #day4 采集到数据库
-                        #将相关参数插入到数据库中sqlite3
-                        try:
-                            # 1. 计算合格率 (防止除以0的错误)
-                            if count == 0:
-                                rate = 0.0
-                            else:
-                                rate = ok_count / count
+        except Exception as e:
+            print(f'服务器错误: {str(e)}')
+            break
+        finally:
+            try:
+                conn.close()  # 确保关闭连接
+                print("连接已关闭")
+            except:
+                pass
 
-                            # 2. 连接数据库
-                            conn = sqlite3.connect(db_file)
-                            cursor = conn.cursor()
+    # 程序结束时关闭socket
+    try:
+        s.close()
+    except:
+        pass
 
-                            # 3. SQL 插入语句
-                            # 注意：我们使用 ? 作为占位符，这是防止 SQL 注入的安全做法
-                            sql = "INSERT INTO myline_workinghistory (device_id_id,number_history, good_number) VALUES (?, ?, ?)"
-                            
-                            # 4. 执行 SQL
-                            # 参数顺序必须与 SQL 中的占位符顺序一致
-                            cursor.execute(sql, (1, count, ok_count))
-                            
-                            # 5. 提交事务并关闭连接
-                            conn.commit()
-                            
-                        except sqlite3.Error as e:
-                            print(f"数据库插入错误: {e}")
-                        
-                else:
-                    conn.send(str_msg)
+    cv2.destroyAllWindows()
+    # 关闭数据库连接
+    conn.close()
+    
+socket_thread = threading.Thread(target=socket_work, daemon=True) # 在子线程中运行服务器函数，daemon=True表示该线程为守护线程，主线程结束时该线程自动结束
+socket_thread.start() # 启动socket子线程
 
-                #isImg_ok(frame)   #调用函数，处理frame图片
-                #if result == True:  #回调函数返回的result值
-                #    conn.send(str_ok)  #PC端发送结果给ABB工业机器人
-               # else:
-                #    conn.send(str_NG)  #PC端发送结果给ABB工业机器人
 
-            except ConnectionResetError:
-                print('客户端连接被重置')
-                break
-            except BrokenPipeError:
-                print('管道破裂，连接已断开')
-                break
-            except Exception as e:
-                print(f'发生未知错误: {str(e)}')
-                break
 
-    except Exception as e:
-        print(f'服务器错误: {str(e)}')
-        break
-    finally:
-        try:
-            conn.close()  # 确保关闭连接
-            print("连接已关闭")
-        except:
-            pass
 
-# 程序结束时关闭socket
-try:
-    s.close()
-except:
-    pass
 
-cv2.destroyAllWindows()
-# 关闭数据库连接
-conn.close()
+
+# ==================== UI类 ====================
+class MainWindow(QMainWindow, Ui_MainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)  # 设置UI
+        self.setWindowTitle("海康相机视觉检测系统")
+
+        # 初始化为空图像
+        self.display_image(None)
+
+    def display_image(self, cv_img):
+        """在label上显示OpenCV图像"""
+        if cv_img is None:
+            # 显示空白图像
+            blank = np.zeros((371, 401, 3), dtype=np.uint8)
+            qimg = QImage(blank.data, blank.shape[1], blank.shape[0], 
+                         blank.shape[1] * 3, QImage.Format_BGR888)
+            self.label.setPixmap(QPixmap.fromImage(qimg))
+        else:
+            # 将OpenCV图像转换为QImage
+            height, width = cv_img.shape[:2]
+            bytes_per_line = 3 * width
+            qimg = QImage(cv_img.data, width, height, bytes_per_line, QImage.Format_BGR888)
+
+            # 缩放图像以适应label大小，保持宽高比
+            pixmap = QPixmap.fromImage(qimg)
+            scaled_pixmap = pixmap.scaled(self.label.size(), 
+                                         Qt.KeepAspectRatio, 
+                                         Qt.SmoothTransformation)
+            self.label.setPixmap(scaled_pixmap)
+
+    def update_image(self, cv_img):
+        """从后台线程接收图像并更新显示"""
+        print("get image")
+        cv2.imshow("image", cv_img)
+        cv2.waitKey(1)
+        #self.display_image(cv_img)
+
+# ==================== 后台线程类 ====================
+class CameraThread(QThread):
+    global obj_cam_operation
+    """相机采集线程"""
+    image_ready = Signal(np.ndarray)  # 图像准备好信号
+
+    def run(self):
+        global img
+        stFrameInfo = MV_FRAME_OUT_INFO_EX()
+        numArray = None
+        stPayloadSize = MVCC_INTVALUE_EX()
+
+        while True:
+            time.sleep(1)
+            ret_temp = obj_cam_operation.obj_cam.MV_CC_GetIntValueEx("PayloadSize", stPayloadSize)
+            if ret_temp != MV_OK:
+                print("error")
+            NeedBufSize = int(stPayloadSize.nCurValue)
+            if obj_cam_operation.buf_grab_image_size < NeedBufSize:
+                obj_cam_operation.buf_grab_image = (c_ubyte * NeedBufSize)()
+                obj_cam_operation.buf_grab_image_size = NeedBufSize
+
+            ret = obj_cam_operation.obj_cam.MV_CC_GetOneFrameTimeout(obj_cam_operation.buf_grab_image, 
+                                                                    obj_cam_operation.buf_grab_image_size, 
+                                                                    stFrameInfo)
+            #ch: 改变像素格式 | en: convert pixel format
+            if stFrameInfo.enPixelType != PixelType_Gvsp_BGR8_Packed:
+                pstCvtParam = MV_CC_PIXEL_CONVERT_PARAM()
+                pstCvtParam.nWidth = stFrameInfo.nWidth                         #图像宽
+                pstCvtParam.nHeight = stFrameInfo.nHeight                       #图像高
+                pstCvtParam.pSrcData = obj_cam_operation.buf_grab_image         #输入数据缓存
+                pstCvtParam.nSrcDataLen = stFrameInfo.nFrameLen;                #输入数据长度
+                pstCvtParam.enSrcPixelType = stFrameInfo.enPixelType            #源像素格式
+                pstCvtParam.enDstPixelType = PixelType_Gvsp_BGR8_Packed         #目标像素格式
+                nConvertDataSize = stFrameInfo.nWidth * stFrameInfo.nHeight * 3
+                pstCvtParam.nDstBufferSize = nConvertDataSize                   #提供的输出缓冲区大小
+                buf_save_image = (c_ubyte * nConvertDataSize)()
+                pstCvtParam.pDstBuffer = buf_save_image                         #输出数据缓存
+                ret = obj_cam_operation.obj_cam.MV_CC_ConvertPixelType(pstCvtParam)
+
+            #ch: 将图片变为OpenCV可读类型 | en: convert image type to make it readable by OpenCV
+            img = Color_numpy(buf_save_image, stFrameInfo.nWidth, stFrameInfo.nHeight)
+            # 发送图像到主线程
+            self.image_ready.emit(img)
+
+
+
+
+
