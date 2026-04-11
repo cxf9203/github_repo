@@ -237,6 +237,9 @@ github_repo/
   - 主界面线程负责显示图像和用户交互
   - 通过信号槽机制实现线程间通信
   - 实时显示相机采集的图像和视觉处理结果
+  - ui界面转出py   pyside6-uic mainUI.ui -o mainUI.py
+  - 更新qrc与qss
+  - pyside6-rcc res/resource.qrc -o res/resource_rc.py
 
 - 程序架构说明：
   - **MainWindow类**：继承自QMainWindow和Ui_MainWindow，负责主界面的显示和交互
