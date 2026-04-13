@@ -335,7 +335,7 @@ def doMeasure(img):
 
     # 保存并显示结果
     cv2.imwrite('gear_measurement_result.png', img_color)
-    return True
+    return img_color
 
 # ==================== Socket线程 ====================
 def socket_work(window):
@@ -370,9 +370,16 @@ def socket_work(window):
                     continue
 
                 #result = isRedcolor(img)
-                result = doMeasure(img)
-
-                if result:
+                result_img = doMeasure(img)
+                
+                # 将结果图像显示到label_3上
+                if result_img is not None:
+                    h, w = result_img.shape[:2]
+                    qimg = QImage(result_img.data, w, h, 3 * w, QImage.Format_BGR888)
+                    pixmap = QPixmap.fromImage(qimg)
+                    window.label_3.setPixmap(
+                        pixmap.scaled(window.label_3.size(), Qt.KeepAspectRatio)
+                    )
                     conn.send(b"ok")
                 else:
                     conn.send(b"ng")
