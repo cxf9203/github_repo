@@ -106,6 +106,9 @@ class CameraThread(QThread):
                 buf = self.cam_op.buf_grab_image
 
             img = Color_numpy(buf, stFrameInfo.nWidth, stFrameInfo.nHeight)
+            #YOLO_Predict(img)
+            #doMeasure(img)
+
 
             self.image_signal.emit(img)
 
@@ -169,18 +172,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
 from ultralytics import YOLO
 # Load your trained YOLO model
-model =YOLO(f'torchModel/lunxi.pt')
+model =YOLO('torchModel/chilun.pt')
 print(model.names)
-#{0: 'dingxiao', 1: 'jilun', 2: 'waike'}
+#{0: 'chiquan', 1: 'dizuo', 2: 'gear'}
 def YOLO_Predict(img):
     global model
-    labelSet = ["dingxiao", "", "jilun","waike"]
+    labelSet = ["chiquan", "", "dizuo","gear"]
     # 初始化计数器字典（只统计非空标签）
     counts = {}
 
-    results = model.predict(source=img, save=True, show=True)
-    print(results)
-
+    results = model.predict(source=img, save=False, show=False)
+    #print(results)
+    chilun_count =0 
     for result in results:
         boxes = result.boxes
         for box in boxes:
@@ -193,149 +196,63 @@ def YOLO_Predict(img):
             # 统计标签数量（忽略空字符串标签）
             if label:
                 counts[label] = counts.get(label, 0) + 1
-
+            if labelidx==2:#齿轮数量+1
+                chilun_count+=1
             # 绘制检测框和标签
             cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
             cv2.putText(img, f"{label} {confidence:.2f}", (x1, y1 - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
 
-    # 打印统计结果
-    print("检测到的标签数量统计:")
-    for label, count in counts.items():
-        print(f"{label}: {count}")
-    # 判断 chilun 数量是否为 4
-    chilun_count = counts.get("chilun", 0)
+
     if chilun_count == 4:
-        print("OK")
+        print("OK，齿轮四个")
         flag = True
     else:
         print(f"NG (chilun 数量为 {chilun_count}，需要 4)")
         flag = False
-    return flag
+    return flag,img
 def doMeasure(img):
-    # ---------------------- 1. 图像读取与预处理 ----------------------
-    # 读取图像（替换为你的图片路径）
-    img = cv2.imread('torchModel/gear.bmp', cv2.IMREAD_GRAYSCALE)
-    if img is None:
-        raise ValueError("无法读取图像，请检查路径")
+    flag = True
 
-    # 高斯滤波去噪，减少轮廓检测的干扰
-    blur = cv2.GaussianBlur(img, (5, 5), 0)
+    global model
+    labelSet = ["chiquan", "", "dizuo","gear"]
+    # 初始化计数器字典（只统计非空标签）
+    counts = {}
 
-    # 自适应二值化，适配光照不均的情况
-    thresh = cv2.adaptiveThreshold(
-        blur, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-        cv2.THRESH_BINARY_INV, 11, 2
-    )
+    results = model.predict(source=img, save=False, show=False)
+    #print(results)
 
-    # 形态学操作，去除小噪点，闭合齿轮轮廓
-    kernel = np.ones((3, 3), np.uint8)
-    morph = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=2)
-    morph = cv2.morphologyEx(morph, cv2.MORPH_OPEN, kernel, iterations=1)
+    for result in results:
+        boxes = result.boxes
+        for box in boxes:
+            x1, y1, x2, y2 = box.xyxy[0]
+            x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+            labelidx = box.cls[0].item()
+            label = labelSet[int(labelidx)]
+            confidence = box.conf[0].item()
 
-    # ---------------------- 2. 轮廓检测与筛选 ----------------------
-    # 提取所有轮廓
-    contours, hierarchy = cv2.findContours(
-        morph, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-    )
-    cv2.drawContours(img, contours, -1, (0, 255, 0), 2) # 绘制所有轮廓（可选）
+            
+            # 计算中心点坐标
+            center_x = (x1 + x2) // 2
+            center_y = (y1 + y2) // 2
+            # 绘制中心点
+            cv2.circle(img, (center_x, center_y), 5, (0, 0, 255), -1)
+            # 在中心点处添加标签
+            cv2.putText(img, f"{label}", (center_x, center_y), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
+            # 在中心点处添加尺寸标签
+            cv2.putText(img, f"{x2-x1}x{y2-y1}", (center_x, center_y + 20), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
+            if x2-x1 >220 and y2-y1 > 220:
+                flag = True
+            else:   
+                flag = False
+                        
+            # 绘制检测框和标签
+            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            cv2.putText(img, f"{label} {confidence:.2f}", (x1, y1 - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+
+    return flag,img
     
-    # 筛选齿轮轮廓（过滤过小/过大的噪点轮廓）
-    gear_contours = []
-    for cnt in contours:
-        area = cv2.contourArea(cnt)
-        # 面积阈值，根据你的图像尺寸调整（这里适配示例图）
-        if 5000 < area < 50000:
-            gear_contours.append(cnt)
-
-    # 按轮廓面积排序：最大的是齿圈，中间4个是行星轮，最小的是中心太阳轮
-    gear_contours = sorted(gear_contours, key=cv2.contourArea, reverse=True)
-    ring_gear = gear_contours[0]  # 最外层齿圈
-    planet_gears = gear_contours[1:5]  # 4个行星轮
-    #sun_gear = gear_contours[5]  # 中心太阳轮（如果存在）
-
-    # ---------------------- 3. 齿轮参数计算 ----------------------
-    def calculate_gear_params(contour, gear_name):
-        """计算单个齿轮的尺寸参数"""
-        # 1. 外接圆（齿顶圆）参数
-        (x, y), radius = cv2.minEnclosingCircle(contour)
-        center = (int(x), int(y))
-        tip_diameter = 2 * radius  # 齿顶圆直径（齿轮总大小）
-        
-        # 2. 内接圆（齿根圆）参数（通过凸包近似）
-        hull = cv2.convexHull(contour, returnPoints=True)
-        (hx, hy), hull_radius = cv2.minEnclosingCircle(hull)
-        root_diameter = 2 * hull_radius  # 齿根圆直径
-        
-        # 3. 齿数计算（通过轮廓的角点/凸缺陷计数）
-        # 方法1：凸缺陷计数（适合齿轮齿形）
-        hull_idx = cv2.convexHull(contour, returnPoints=False)
-        defects = cv2.convexityDefects(contour, hull_idx)
-        tooth_count = 0
-        if defects is not None:
-            for i in range(defects.shape[0]):
-                s, e, f, d = defects[i, 0]
-                # 深度阈值，过滤非齿形的凹陷
-                if d > 1000:
-                    tooth_count += 1
-        
-        # 4. 轮廓周长、面积
-        perimeter = cv2.arcLength(contour, True)
-        area = cv2.contourArea(contour)
-        
-        # 打印参数
-        print(f"=== {gear_name} 参数 ===")
-        print(f"齿顶圆直径: {tip_diameter:.2f} 像素")
-        print(f"齿根圆直径: {root_diameter:.2f} 像素")
-        print(f"齿数: {tooth_count}")
-        print(f"轮廓周长: {perimeter:.2f} 像素")
-        print(f"轮廓面积: {area:.2f} 像素²\n")
-        
-        return center, radius, tip_diameter, tooth_count
-
-    # 计算齿圈参数
-    ring_center, ring_radius, ring_tip_dia, ring_teeth = calculate_gear_params(ring_gear, "齿圈")
-    #绘制齿圈
-    cv2.circle(img, ring_center, int(ring_radius), (0, 0, 255), 2)
-    
-    # 计算4个行星轮参数
-    planet_params = []
-    for i, pg in enumerate(planet_gears):
-        params = calculate_gear_params(pg, f"行星轮 {i+1}")
-        planet_params.append(params)
-
-    # 计算太阳轮参数（如果存在）
-    # if len(gear_contours) >= 6:
-    #     sun_center, sun_radius, sun_tip_dia, sun_teeth = calculate_gear_params(sun_gear, "太阳轮")
-
-    # ---------------------- 4. 结果可视化 ----------------------
-    # 转彩色图用于标注
-    img_color = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-
-    # 绘制齿圈
-    cv2.circle(img_color, ring_center, int(ring_radius), (0, 0, 255), 2)
-    cv2.putText(img_color, f"齿圈 D={ring_tip_dia:.1f}px 齿数={ring_teeth}",
-                (ring_center[0]-150, ring_center[1]-ring_radius-20),
-                cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
-
-    # 绘制行星轮
-    colors = [(0, 255, 0), (255, 0, 0), (255, 255, 0), (0, 255, 255)]
-    for i, (center, radius, dia, teeth) in enumerate(planet_params):
-        cv2.circle(img_color, center, int(radius), colors[i], 2)
-        cv2.putText(img_color, f"行星轮{i+1} D={dia:.1f}px 齿数={teeth}",
-                    (center[0]-80, center[1]-int(radius)-15),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, colors[i], 2)
-
-    # 绘制太阳轮
-    # if len(gear_contours) >= 6:
-    #     cv2.circle(img_color, sun_center, int(sun_radius), (255, 0, 255), 2)
-    #     cv2.putText(img_color, f"太阳轮 D={sun_tip_dia:.1f}px 齿数={sun_teeth}",
-    #                 (sun_center[0]-80, sun_center[1]-int(sun_radius)-15),
-    #                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 2)
-
-    # 保存并显示结果
-    cv2.imwrite('gear_measurement_result.png', img_color)
-    return img_color
 
 # ==================== Socket线程 ====================
 def socket_work(window):
@@ -343,10 +260,11 @@ def socket_work(window):
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
     #host = socket.gethostname()
-    host = "192.168.1.3"
+    host = "192.168.101.98"
     port = 8005
     s.bind((host, port))
-    s.listen(5)
+    
+    s.listen(1)
 
     print("Socket启动")
 
@@ -362,7 +280,7 @@ def socket_work(window):
             msg = data.decode()
             print("收到:", msg)
             
-            if msg == "pic":
+            if msg == "dizuo":
                 img = window.latest_img
 
                 if img is None:
@@ -370,27 +288,31 @@ def socket_work(window):
                     continue
 
                 #result = isRedcolor(img)
-                result_img = doMeasure(img)
-                
-                # 将结果图像显示到label_3上
-                if result_img is not None:
-                    h, w = result_img.shape[:2]
-                    qimg = QImage(result_img.data, w, h, 3 * w, QImage.Format_BGR888)
-                    pixmap = QPixmap.fromImage(qimg)
-                    window.label_3.setPixmap(
-                        pixmap.scaled(window.label_3.size(), Qt.KeepAspectRatio)
-                    )
-                    conn.send(b"ok")
+                result,result_img = doMeasure(img)#测量尺寸
+                h, w = result_img.shape[:2]
+                qimg = QImage(result_img.data, w, h, 3 * w, QImage.Format_BGR888)
+                pixmap = QPixmap.fromImage(qimg)
+                window.label_3.setPixmap(
+                    pixmap.scaled(window.label_3.size(), Qt.KeepAspectRatio)
+                )
+                if result:
+                    conn.send(b"ok")#继续
                 else:
-                    conn.send(b"ng")
-            elif msg == "yolo":
+                    conn.send(b"ng")#停止肥料
+            elif msg == "chilun":
                 img = window.latest_img
 
                 if img is None:
                     conn.send(b"none")
                     continue
 
-                result = YOLO_Predict(img)
+                result,result_img = YOLO_Predict(img)#检测齿轮 外圈
+                h, w = result_img.shape[:2]
+                qimg = QImage(result_img.data, w, h, 3 * w, QImage.Format_BGR888)
+                pixmap = QPixmap.fromImage(qimg)
+                window.label_3.setPixmap(
+                    pixmap.scaled(window.label_3.size(), Qt.KeepAspectRatio)
+                )
                 if result:
                     conn.send(b"ok")
                 else:

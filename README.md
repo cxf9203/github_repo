@@ -267,7 +267,9 @@ github_repo/
 
 - 使用方法：
   1. 确保已安装PySide6：`pip install PySide6`
-  2. 运行程序：`python day4_socket_vision_with_hikUI.py`
+  2. 运行程序：`python day4_socket_vision_with_hikUI.py` 
+  pyside6-uic ui文件名.ui -o 输出文件名.py
+
   3. 程序会自动枚举并打开相机
   4. 主界面会实时显示相机采集的图像
   5. 当机器人发送"pic"请求时，程序会进行视觉处理并将结果显示在主界面
